@@ -1,0 +1,21 @@
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+
+COPY pom.xml .
+COPY common/pom.xml common/
+COPY data-service/pom.xml data-service/
+COPY api-service/pom.xml api-service/
+RUN mvn dependency:go-offline -B -pl api-service -am
+
+COPY checkstyle.xml .
+COPY common common
+COPY api-service api-service
+RUN mvn clean package -pl api-service -am -DskipTests -B
+
+FROM eclipse-temurin:21-jre
+RUN useradd -m -u 1001 appuser
+WORKDIR /app
+COPY --from=build --chown=appuser:appuser /app/api-service/target/*.jar app.jar
+USER appuser
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

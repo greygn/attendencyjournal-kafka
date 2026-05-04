@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: data-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  sql:
+    init:
+      mode: always
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: data-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: ru.krylov.attendencyjournal.dto
+        spring.json.value.default.type: ru.krylov.attendencyjournal.dto.CheckinRequest
+
+server:
+  port: ${SERVER_PORT:8081}
+
+kafka:
+  topic:
+    checkins: ${KAFKA_TOPIC_CHECKINS:checkins}
