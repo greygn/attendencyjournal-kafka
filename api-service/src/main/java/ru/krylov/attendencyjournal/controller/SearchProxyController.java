@@ -5,20 +5,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.krylov.attendencyjournal.support.DataServiceRestSupport;
+import ru.krylov.attendencyjournal.client.DataServiceClient;
 
+/* REST контроллер для поиска отметок о присутствии.
+   Прокси для поиска. */
 @RestController
 @RequestMapping("/api/search")
 public class SearchProxyController {
 
-    private final RestClient dataServiceRestClient;
+    private final DataServiceClient dataServiceClient;
 
-    public SearchProxyController(RestClient dataServiceRestClient) {
-        this.dataServiceRestClient = dataServiceRestClient;
+    public SearchProxyController(DataServiceClient dataServiceClient) {
+        this.dataServiceClient = dataServiceClient;
     }
 
+    /* Поиск отметок по студенту и/или занятию. */
     @GetMapping("/checkins")
     public ResponseEntity<String> searchCheckins(
             @RequestParam(required = false) Long studentId,
@@ -30,6 +32,6 @@ public class SearchProxyController {
         if (lessonId != null) {
             builder.queryParam("lessonId", lessonId);
         }
-        return DataServiceRestSupport.get(dataServiceRestClient, builder.build().toUriString());
+        return dataServiceClient.searchCheckins(builder.build().toUriString());
     }
 }

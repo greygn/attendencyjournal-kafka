@@ -13,11 +13,27 @@ import ru.krylov.attendencyjournal.dto.CheckinRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Конфигурация для Kafka продюсера.
+ * 
+ * Создает KafkaTemplate для отправки сообщений типа CheckinRequest в Kafka.
+ */
 @Configuration
 public class CheckinKafkaProducerConfig {
 
+    /**
+     * Создает KafkaTemplate для отправки сообщений о присутствии.
+     * 
+     * Конфигурирует:
+     * - KEY_SERIALIZER_CLASS_CONFIG: StringSerializer (для partition key)
+     * - VALUE_SERIALIZER_CLASS_CONFIG: JsonSerializer (для CheckinRequest)
+     * - ADD_TYPE_INFO_HEADERS: false (не добавляем информацию о типе)
+     * 
+     * @param bootstrapServers адреса Kafka брокеров
+     * @return KafkaTemplate для отправки CheckinRequest
+     */
     @Bean
-    public KafkaTemplate<String, CheckinRequest> checkinKafkaTemplate(
+    public KafkaTemplate<String, CheckinRequest> kafkaTemplate(
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

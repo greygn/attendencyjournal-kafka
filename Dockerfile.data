@@ -7,7 +7,6 @@ COPY data-service/pom.xml data-service/
 COPY api-service/pom.xml api-service/
 RUN mvn dependency:go-offline -B -pl data-service -am
 
-COPY checkstyle.xml .
 COPY common common
 COPY data-service data-service
 RUN mvn clean package -pl data-service -am -DskipTests -B

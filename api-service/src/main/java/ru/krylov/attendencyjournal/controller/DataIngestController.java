@@ -1,32 +1,32 @@
 package ru.krylov.attendencyjournal.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.krylov.attendencyjournal.dto.CheckinRequest;
+import ru.krylov.attendencyjournal.publisher.KafkaPublisher;
 
+/* REST контроллер для пакетной загрузки данных о присутствии.
+   Отправляет в Kafka асинхронно. */
 @RestController
 @RequestMapping("/api/data")
 public class DataIngestController {
 
-    private final KafkaTemplate<String, CheckinRequest> kafkaTemplate;
-    private final String checkinsTopic;
+    private final KafkaPublisher kafkaPublisher;
 
-    public DataIngestController(
-            @Qualifier("checkinKafkaTemplate") KafkaTemplate<String, CheckinRequest> kafkaTemplate,
-            @Value("${kafka.topic.checkins}") String checkinsTopic) {
-        this.kafkaTemplate = kafkaTemplate;
-        this.checkinsTopic = checkinsTopic;
+    public DataIngestController(KafkaPublisher kafkaPublisher) {
+        this.kafkaPublisher = kafkaPublisher;
     }
 
+    /*
+     * Добавляет пакет отметок в Kafka (асинхронно).
+     * Возвращает 202 Accepted.
+     */
     @PostMapping("/batches")
     public ResponseEntity<Void> addBatch(@RequestBody CheckinRequest request) {
-        kafkaTemplate.send(checkinsTopic, request);
+        kafkaPublisher.publishCheckin(request);
         return ResponseEntity.accepted().build();
     }
 }
